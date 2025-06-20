@@ -1,0 +1,22 @@
+{
+    "chat.mcp.serverSampling": {
+        "web_llm/.vscode/mcp.json: context7": {
+            "allowedModels": [
+                "github.copilot-chat/gpt-4.1",
+                "github.copilot-chat/claude-sonnet-4",
+                "github.copilot-chat/gemini-2.5-pro",
+                "github.copilot-chat/gpt-4o",
+                "github.copilot-chat/o4-mini"
+            ]
+        }
+    },
+    // Use VSCode's default format on save, but let Prettier and ESLint handle formatting and autofix.
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "always"
+    },
+    // Do not set Prettier or ESLint config overrides here; use project config files only.
+    "prettier.enable": true,
+    "eslint.enable": true
+}
