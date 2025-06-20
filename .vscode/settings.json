@@ -1,0 +1,13 @@
+{
+    "chat.mcp.serverSampling": {
+        "web_llm/.vscode/mcp.json: context7": {
+            "allowedModels": [
+                "github.copilot-chat/gpt-4.1",
+                "github.copilot-chat/claude-sonnet-4",
+                "github.copilot-chat/gemini-2.5-pro",
+                "github.copilot-chat/gpt-4o",
+                "github.copilot-chat/o4-mini"
+            ]
+        }
+    }
+}
