@@ -9,5 +9,14 @@
                 "github.copilot-chat/o4-mini"
             ]
         }
-    }
+    },
+    // Use VSCode's default format on save, but let Prettier and ESLint handle formatting and autofix.
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "always"
+    },
+    // Do not set Prettier or ESLint config overrides here; use project config files only.
+    "prettier.enable": true,
+    "eslint.enable": true
 }
