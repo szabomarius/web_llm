@@ -11,7 +11,8 @@
         "lint:fix": "eslint . --fix && prettier . --write",
         "preview": "vite preview",
         "test": "vitest run",
-        "agent-check": "npm run build && npm run lint:fix && npm run test"
+        "agent-check": "npm run build && npm run lint:fix && npm run test",
+        "prepare": "husky install"
     },
     "dependencies": {
         "react": "^19.1.0",
