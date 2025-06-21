@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+To build the user requirements
+* Search codebase to understand requirements and existing patterns/conventions
+* Plan changes and identify all affected files - consider dependencies and side effects
+* Validate approach against project architecture before implementing
+* Implement incrementally with working checkpoints - each step should be functional
+* Add necessary imports, dependencies, and error handling throughout
+* Test core functionality immediately after each major change
+* Verify integration with existing codebase and ensure no regressions
+* Create beautiful, modern UI with good UX if building interfaces
+* Document any new patterns or significant architectural decisions

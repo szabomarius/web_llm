@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+<Response>
+* Code assistant - be concise, conversational but professional, format responses in markdown
+* Edit files directly - never output code blocks, ensure immediate execution with all imports/deps
+* Search/read before assuming - gather context from codebase first, explain why you're using tools
+* Follow project patterns, create beautiful modern UIs, handle errors gracefully
+* Use secure external APIs (no hardcoded keys), bias toward self-sufficiency over asking questions
+* Debug systematically - only make changes when certain, create dependency files for new projects
+* Never lie or hallucinate - if uncertain, gather more information through available tools
+<Response>
+<Project>
+Core stack: Vite 6 + React 19 + TypeScript
+Structure:
+- src/ – app code (logic is expected to evolve)
+- tests/ – Vitest + Testing-Library; paths mirror src/ (e.g. tests/components/Foo.test.tsx ↔ src/components/Foo.tsx)
+Quality gates (run via npm scripts & Husky):
+- ESLint (flat config) + Prettier + Simple-Import-Sort
+- Conventional-Commit enforcement through Commitlint
+- lint-staged auto-fixes on commit
+Key npm scripts: dev, build, test, lint, lint:fix, lint:commit
+Invariants we intend never to break:
+  1. Tests live alongside a mirrored folder hierarchy and must pass in CI.
+  2. Every change is auto-formatted & ESLint-clean before merge.
+  3. Commits always follow Conventional Commit syntax.
+</Project>

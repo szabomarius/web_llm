@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Based on user provided bug report systematically diagnose:
+* Search codebase and read error logs/recent changes first - understand current state
+* Identify root cause vs symptoms - trace the actual failure path, not assumptions
+* Validate proposed fix against similar patterns in codebase
+* Test fix in isolation before applying - ensure no side effects
+* Verify solution resolves original issue and doesn't break existing functionality
+* Document what was actually broken and why the fix works
+* If still uncertain, gather more context before proceeding
