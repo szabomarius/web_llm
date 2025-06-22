@@ -33,7 +33,7 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
         <aside
             role="complementary"
             aria-label="Chat drawer"
-            className={`fixed right-0 top-0 z-30 h-full w-80 transform bg-yellow-100 shadow-xl transition-transform duration-300 ${
+            className={`fixed right-0 top-0 z-30 h-full w-full sm:w-2/5 transform bg-white/90 backdrop-blur-md shadow-xl transition-transform duration-300 ${
                 isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
         >

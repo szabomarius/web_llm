@@ -12,7 +12,7 @@ const ChatToggleButton: FC<ChatToggleButtonProps> = ({ isOpen, onToggle }) => (
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
         title="⌘E"
         onClick={onToggle}
-        className="group absolute -left-8 top-1/2 z-40 -translate-y-1/2 rounded-l-md bg-blue-500 px-2 py-3 text-xs font-semibold text-white hover:bg-blue-600"
+        className="group absolute -left-8 top-1/2 z-40 -translate-y-1/2 rounded-l-md bg-indigo-500 px-2 py-3 text-xs font-semibold text-white hover:bg-indigo-600"
     >
         {isOpen ? '→' : '←'}
         <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 translate-x-2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
