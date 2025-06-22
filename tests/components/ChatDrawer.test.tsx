@@ -15,20 +15,16 @@ describe('Chat drawer toggle', () => {
         const drawerContainer = screen.getByRole('complementary', {
             name: /chat drawer/i,
         });
-        expect(drawerContainer.classList.contains('translate-x-full')).toBe(
-            true
-        );
+        expect(drawerContainer).toHaveClass('translate-x-full');
 
         // Open drawer
         fireEvent.click(toggleButton);
-        expect(drawerContainer.classList.contains('translate-x-0')).toBe(true);
+        expect(drawerContainer).toHaveClass('translate-x-0');
 
         // Close again via same toggle handle
         fireEvent.click(toggleButton);
 
         // Drawer closed again
-        expect(drawerContainer.classList.contains('translate-x-full')).toBe(
-            true
-        );
+        expect(drawerContainer).toHaveClass('translate-x-full');
     });
 });
