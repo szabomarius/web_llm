@@ -1,9 +1,8 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import ChatDrawer from './components/chat/ChatDrawer';
 import type { ChatMessage } from './components/chat/ChatMessage.type';
-import ChatToggleButton from './components/chat/ChatToggleButton';
 
 const App: FC = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -25,6 +24,18 @@ const App: FC = () => {
         ]);
     };
 
+    // Toggle chat with ⌘+E hotkey
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && (e.key === 'e' || e.key === 'E')) {
+                e.preventDefault();
+                setIsChatOpen((o) => !o);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     return (
         <div className="relative min-h-screen bg-white">
             <div className="flex h-full items-center justify-center">
@@ -34,13 +45,9 @@ const App: FC = () => {
             {/* Chat components */}
             <ChatDrawer
                 isOpen={isChatOpen}
-                onClose={() => setIsChatOpen(false)}
+                toggle={() => setIsChatOpen((o) => !o)}
                 messages={messages}
                 onSend={handleSend}
-            />
-            <ChatToggleButton
-                isOpen={isChatOpen}
-                onToggle={() => setIsChatOpen((o) => !o)}
             />
         </div>
     );

@@ -23,11 +23,8 @@ describe('Chat drawer toggle', () => {
         fireEvent.click(toggleButton);
         expect(drawerContainer.classList.contains('translate-x-0')).toBe(true);
 
-        // Button label changed
-        const closeButtonHandle = screen.getByRole('button', {
-            name: /close chat panel/i,
-        });
-        fireEvent.click(closeButtonHandle);
+        // Close again via same toggle handle
+        fireEvent.click(toggleButton);
 
         // Drawer closed again
         expect(drawerContainer.classList.contains('translate-x-full')).toBe(

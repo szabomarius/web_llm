@@ -4,17 +4,18 @@ import { useEffect, useRef } from 'react';
 import ChatInput from './ChatInput';
 import ChatMessage from './ChatMessage';
 import type { ChatMessage as ChatMessageType } from './ChatMessage.type';
+import ChatToggleButton from './ChatToggleButton';
 
 interface ChatDrawerProps {
     isOpen: boolean;
-    onClose: () => void;
+    toggle: () => void;
     messages: ChatMessageType[];
     onSend: (text: string) => void;
 }
 
 const ChatDrawer: FC<ChatDrawerProps> = ({
     isOpen,
-    onClose,
+    toggle,
     messages,
     onSend,
 }) => {
@@ -36,15 +37,8 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
                 isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
         >
-            {/* Close button */}
-            <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close chat panel"
-                className="absolute left-4 top-4 rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600"
-            >
-                ✕
-            </button>
+            {/* Toggle handle */}
+            <ChatToggleButton isOpen={isOpen} onToggle={toggle} />
 
             {/* Message list */}
             <div
