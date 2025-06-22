@@ -33,7 +33,7 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
         <aside
             role="complementary"
             aria-label="Chat drawer"
-            className={`fixed right-0 top-0 z-30 h-full w-full sm:w-2/5 transform bg-white/90 backdrop-blur-md shadow-xl transition-transform duration-300 ${
+            className={`fixed right-0 top-0 z-30 flex h-full w-full sm:w-2/5 transform flex-col bg-white/90 backdrop-blur-md shadow-xl transition-transform duration-300 ${
                 isOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
         >
@@ -43,7 +43,7 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
             {/* Message list */}
             <div
                 ref={containerRef}
-                className="flex h-[calc(100%-64px)] flex-col gap-2 overflow-y-auto p-4"
+                className="flex flex-1 flex-col gap-2 overflow-y-auto p-4"
             >
                 {messages.map((m) => (
                     <ChatMessage key={m.id} role={m.role}>

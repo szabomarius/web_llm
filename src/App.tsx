@@ -37,10 +37,8 @@ const App: FC = () => {
     }, []);
 
     return (
-        <div className="relative min-h-screen bg-white">
-            <div className="flex h-full items-center justify-center">
-                <h1 className="text-4xl font-bold text-black">Hello World</h1>
-            </div>
+        <div className="relative flex min-h-screen items-center justify-center bg-white">
+            <h1 className="text-4xl font-bold text-black">Hello World</h1>
 
             {/* Chat components */}
             <ChatDrawer

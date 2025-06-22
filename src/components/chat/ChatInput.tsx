@@ -1,6 +1,8 @@
 import type { FC, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+import sendIcon from '../../assets/send.svg';
+
 interface ChatInputProps {
     onSend: (text: string) => void;
 }
@@ -33,7 +35,7 @@ const ChatInput: FC<ChatInputProps> = ({ onSend }) => {
     }, [text]);
 
     return (
-        <div className="flex gap-2 p-2">
+        <div className="flex items-end gap-2 p-2">
             <textarea
                 ref={textareaRef}
                 placeholder="Type a message..."
@@ -41,14 +43,15 @@ const ChatInput: FC<ChatInputProps> = ({ onSend }) => {
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                className="flex-1 resize-none rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 min-h-10 resize-none rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <button
                 type="button"
+                aria-label="Send message"
                 onClick={handleSend}
-                className="rounded bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600"
+                className="flex h-10 w-10 items-center justify-center rounded bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-                Send
+                <img src={sendIcon} alt="send" className="h-5 w-5" />
             </button>
         </div>
     );
