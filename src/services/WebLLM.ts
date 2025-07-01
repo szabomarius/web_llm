@@ -1,62 +1,35 @@
-import {
-    pipeline,
-    type TextGenerationPipeline,
-    TextStreamer,
-} from '@huggingface/transformers';
+export type WebLLMMessage = {
+    type:
+        | 'token'
+        | 'generation-complete'
+        | 'ready'
+        | 'error'
+        | 'download-progress';
+    payload: unknown;
+};
 
 export class WebLLM {
-    private _pipe: Promise<TextGenerationPipeline>;
+    private worker: Worker;
+    private onMessage: ((message: WebLLMMessage) => void) | null = null;
 
-    constructor() {
-        // Start loading the model as soon as the service is constructed so that
-        // subsequent calls to `generate` can reuse the same pipeline instance.
-        this._pipe = this._loadModel();
-    }
-
-    /**
-     * Load the text-generation pipeline. You can swap the model identifier with
-     * any other model available on the Hugging Face Hub that is compatible
-     * with the Transformers.js runtime.
-     */
-    private async _loadModel() {
-        // Using an official Transformers.js compatible checkpoint so we avoid
-        // 404s for missing ONNX files. See
-        // https://huggingface.co/Xenova/distilgpt2 for the available assets.
-        return pipeline('text-generation', 'onnx-community/Qwen3-0.6B-ONNX', {
-            dtype: 'q4f16',
-        });
-    }
-
-    /**
-     * Generate a completion for the provided prompt.
-     *
-     * Example:
-     * ```ts
-     * const llm = new WebLLM();
-     * const reply = await llm.generate('Hi, how are you?');
-     * console.log(reply);
-     * ```
-     */
-    async generate(prompt: string) {
-        const pipe = await this._pipe;
-
-        const messages = [
-            { role: 'system', content: 'You are a helpful assistant.' },
+    constructor(onMessage: (message: WebLLMMessage) => void) {
+        this.worker = new Worker(
+            new URL('../workers/transformers.worker.ts', import.meta.url),
             {
-                role: 'user',
-                content: prompt,
-            },
-        ];
+                type: 'module',
+            }
+        );
+        this.onMessage = onMessage;
+        this.worker.onmessage = (event: MessageEvent<WebLLMMessage>) => {
+            this.onMessage?.(event.data);
+        };
+    }
 
-        // Generate a response
-        const output = await pipe(messages, {
-            max_new_tokens: 512,
-            do_sample: false,
-            streamer: new TextStreamer(pipe.tokenizer, {
-                skip_prompt: true,
-                skip_special_tokens: true,
-            }),
-        });
-        console.log(output[0]);
+    public generate(prompt: string) {
+        this.worker.postMessage({ prompt });
+    }
+
+    public terminate() {
+        this.worker.terminate();
     }
 }
