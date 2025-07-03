@@ -5,9 +5,16 @@ import ChatDrawer from './components/chat/ChatDrawer';
 import type { ChatMessage } from './components/chat/ChatMessage.type';
 import { WebLLM, type WebLLMMessage } from './services/WebLLM';
 
+type DownloadProgress = {
+    progress: number;
+    file: string;
+};
+
 const App: FC = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [downloadProgress, setDownloadProgress] =
+        useState<DownloadProgress | null>(null);
     const llm = useRef<WebLLM | null>(null);
 
     useEffect(() => {
@@ -32,7 +39,25 @@ const App: FC = () => {
                 case 'generation-complete':
                     // Generation is done.
                     break;
+                case 'download-progress': {
+                    const payload = message.payload as {
+                        progress: number;
+                        file: string;
+                    };
+                    if (
+                        payload &&
+                        typeof payload.progress === 'number' &&
+                        typeof payload.file === 'string'
+                    ) {
+                        setDownloadProgress({
+                            progress: payload.progress,
+                            file: payload.file,
+                        });
+                    }
+                    break;
+                }
                 case 'ready':
+                    setDownloadProgress(null);
                     // You could add a status indicator here.
                     break;
                 case 'error':
@@ -98,6 +123,7 @@ const App: FC = () => {
                 toggle={() => setIsChatOpen((o) => !o)}
                 messages={messages}
                 onSend={handleSend}
+                downloadProgress={downloadProgress}
             />
         </div>
     );

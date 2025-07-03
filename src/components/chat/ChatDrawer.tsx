@@ -11,6 +11,7 @@ interface ChatDrawerProps {
     toggle: () => void;
     messages: ChatMessageType[];
     onSend: (text: string) => void;
+    downloadProgress: { progress: number; file: string } | null;
 }
 
 const ChatDrawer: FC<ChatDrawerProps> = ({
@@ -18,6 +19,7 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
     toggle,
     messages,
     onSend,
+    downloadProgress,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +47,20 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
                 ref={containerRef}
                 className="flex flex-1 flex-col gap-2 overflow-y-auto p-4"
             >
+                {downloadProgress && (
+                    <div className="mb-4 rounded-lg bg-gray-100 p-4 text-sm text-gray-700">
+                        <p className="font-semibold">Downloading model...</p>
+                        <p className="truncate">{downloadProgress.file}</p>
+                        <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                            <div
+                                className="h-2 rounded-full bg-blue-600"
+                                style={{
+                                    width: `${downloadProgress.progress}%`,
+                                }}
+                            ></div>
+                        </div>
+                    </div>
+                )}
                 {messages.map((m) => (
                     <ChatMessage key={m.id} role={m.role}>
                         {m.content}
