@@ -31,6 +31,18 @@ class PipelineSingleton {
     }
 }
 
+async function initialize() {
+    try {
+        await PipelineSingleton.getInstance();
+        self.postMessage({ type: 'ready' });
+    } catch (e) {
+        self.postMessage({
+            type: 'error',
+            payload: e,
+        });
+    }
+}
+
 self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
     const pipe = await PipelineSingleton.getInstance();
     if (!pipe) {
@@ -71,5 +83,4 @@ self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
     self.postMessage({ type: 'generation-complete' });
 };
 
-// Signal that the worker is ready.
-self.postMessage({ type: 'ready' });
+initialize();

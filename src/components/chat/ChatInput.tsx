@@ -5,9 +5,10 @@ import sendIcon from '../../assets/send.svg';
 
 interface ChatInputProps {
     onSend: (text: string) => void;
+    disabled?: boolean;
 }
 
-const ChatInput: FC<ChatInputProps> = ({ onSend }) => {
+const ChatInput: FC<ChatInputProps> = ({ onSend, disabled }) => {
     const [text, setText] = useState('');
 
     const handleSend = () => {
@@ -44,12 +45,14 @@ const ChatInput: FC<ChatInputProps> = ({ onSend }) => {
                 onKeyDown={handleKeyDown}
                 rows={1}
                 className="flex-1 min-h-10 resize-none rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                disabled={disabled}
             />
             <button
                 type="button"
                 aria-label="Send message"
                 onClick={handleSend}
                 className="flex h-10 w-10 items-center justify-center rounded bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                disabled={disabled}
             >
                 <img src={sendIcon} alt="send" className="h-5 w-5" />
             </button>

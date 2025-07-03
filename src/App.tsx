@@ -10,11 +10,14 @@ type DownloadProgress = {
     file: string;
 };
 
+type ModelStatus = 'initializing' | 'ready' | 'error';
+
 const App: FC = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [downloadProgress, setDownloadProgress] =
         useState<DownloadProgress | null>(null);
+    const [modelStatus, setModelStatus] = useState<ModelStatus>('initializing');
     const llm = useRef<WebLLM | null>(null);
 
     useEffect(() => {
@@ -54,13 +57,15 @@ const App: FC = () => {
                             file: payload.file,
                         });
                     }
+                    setModelStatus('initializing');
                     break;
                 }
                 case 'ready':
                     setDownloadProgress(null);
-                    // You could add a status indicator here.
+                    setModelStatus('ready');
                     break;
                 case 'error':
+                    setModelStatus('error');
                     // Handle errors from the worker.
                     setMessages((prev) => [
                         ...prev,
@@ -124,6 +129,7 @@ const App: FC = () => {
                 messages={messages}
                 onSend={handleSend}
                 downloadProgress={downloadProgress}
+                modelStatus={modelStatus}
             />
         </div>
     );
