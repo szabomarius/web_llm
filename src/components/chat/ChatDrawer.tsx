@@ -105,9 +105,12 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
                 </div>
 
                 {messages.map((message) => (
-                    <ChatMessage key={message.id} role={message.role}>
-                        {message.content}
-                    </ChatMessage>
+                    <ChatMessage
+                        key={message.id}
+                        role={message.role}
+                        content={message.content}
+                        thinking={message.thinking}
+                    />
                 ))}
             </div>
             {/* Input */}

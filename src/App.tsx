@@ -27,12 +27,59 @@ const App: FC = () => {
                     setMessages((prev) => {
                         const lastMessage = prev[prev.length - 1];
                         if (lastMessage?.role === 'assistant') {
+                            const newRawContent =
+                                (lastMessage._rawContent || '') +
+                                message.payload;
+
+                            let finalContent = '';
+                            let finalThinking = '';
+                            let buffer = newRawContent;
+
+                            const thinkTagStart = '<think>';
+                            const thinkTagEnd = '</think>';
+
+                            while (buffer.length > 0) {
+                                const thinkStartIdx =
+                                    buffer.indexOf(thinkTagStart);
+
+                                if (thinkStartIdx === -1) {
+                                    finalContent += buffer;
+                                    buffer = '';
+                                    continue;
+                                }
+
+                                finalContent += buffer.substring(
+                                    0,
+                                    thinkStartIdx
+                                );
+                                buffer = buffer.substring(thinkStartIdx);
+
+                                const thinkEndIdx = buffer.indexOf(thinkTagEnd);
+
+                                if (thinkEndIdx === -1) {
+                                    finalThinking += buffer.substring(
+                                        thinkTagStart.length
+                                    );
+                                    buffer = '';
+                                    continue;
+                                }
+
+                                finalThinking += buffer.substring(
+                                    thinkTagStart.length,
+                                    thinkEndIdx
+                                );
+                                buffer = buffer.substring(
+                                    thinkEndIdx + thinkTagEnd.length
+                                );
+                            }
+
                             return [
                                 ...prev.slice(0, -1),
                                 {
                                     ...lastMessage,
-                                    content:
-                                        lastMessage.content + message.payload,
+                                    content: finalContent,
+                                    thinking: finalThinking,
+                                    _rawContent: newRawContent,
                                 },
                             ];
                         }
@@ -101,6 +148,8 @@ const App: FC = () => {
             id: Date.now() + 1,
             role: 'assistant',
             content: '',
+            thinking: '',
+            _rawContent: '',
         };
         setMessages((prev) => [...prev, userMessage, assistantMessage]);
         llm.current.generate(text);
