@@ -18,6 +18,7 @@ const App: FC = () => {
     const [downloadProgress, setDownloadProgress] =
         useState<DownloadProgress | null>(null);
     const [modelStatus, setModelStatus] = useState<ModelStatus>('initializing');
+    const [isGenerating, setIsGenerating] = useState(false);
     const llm = useRef<WebLLM | null>(null);
 
     useEffect(() => {
@@ -87,6 +88,7 @@ const App: FC = () => {
                     });
                     break;
                 case 'generation-complete':
+                    setIsGenerating(false);
                     // Generation is done.
                     break;
                 case 'download-progress': {
@@ -152,6 +154,7 @@ const App: FC = () => {
             _rawContent: '',
         };
         setMessages((prev) => [...prev, userMessage, assistantMessage]);
+        setIsGenerating(true);
         llm.current.generate(text);
     };
 
@@ -179,6 +182,7 @@ const App: FC = () => {
                 onSend={handleSend}
                 downloadProgress={downloadProgress}
                 modelStatus={modelStatus}
+                isGenerating={isGenerating}
             />
         </div>
     );

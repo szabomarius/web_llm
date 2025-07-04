@@ -13,6 +13,7 @@ interface ChatDrawerProps {
     onSend: (text: string) => void;
     downloadProgress: { progress: number; file: string } | null;
     modelStatus: 'initializing' | 'ready' | 'error';
+    isGenerating: boolean;
 }
 
 const ChatDrawer: FC<ChatDrawerProps> = ({
@@ -22,6 +23,7 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
     onSend,
     downloadProgress,
     modelStatus,
+    isGenerating,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -115,7 +117,10 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
             </div>
             {/* Input */}
             <div className="border-t border-gray-200 p-4">
-                <ChatInput onSend={onSend} disabled={modelStatus !== 'ready'} />
+                <ChatInput
+                    onSend={onSend}
+                    disabled={modelStatus !== 'ready' || isGenerating}
+                />
             </div>
             {/* Click outside to close maybe implement later */}
         </aside>
