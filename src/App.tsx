@@ -115,15 +115,15 @@ const App: FC = () => {
                     break;
                 case 'error':
                     setModelStatus('error');
+                    setIsGenerating(false);
                     // Handle errors from the worker.
                     setMessages((prev) => [
                         ...prev,
                         {
                             id: Date.now(),
                             role: 'assistant',
-                            content: `Error: ${JSON.stringify(
-                                message.payload
-                            )}`,
+                            content:
+                                'Sorry, an error occurred while processing your request. Please try again.',
                         },
                     ]);
                     break;
@@ -172,7 +172,21 @@ const App: FC = () => {
 
     return (
         <div className="relative flex min-h-screen items-center justify-center bg-white">
-            <h1 className="text-4xl font-bold text-black">Hello World</h1>
+            <div className="text-center">
+                <h1 className="text-4xl font-bold text-black mb-4">
+                    WebLLM Chat
+                </h1>
+                <p className="text-gray-600 mb-2">
+                    An AI chat interface powered by WebLLM
+                </p>
+                <p className="text-sm text-gray-500">
+                    Press{' '}
+                    <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">
+                        ⌘+E
+                    </kbd>{' '}
+                    to open the chat
+                </p>
+            </div>
 
             {/* Chat components */}
             <ChatDrawer

@@ -1,4 +1,4 @@
-import type { FC, KeyboardEvent } from 'react';
+import type { FC } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import sendIcon from '../../assets/send.svg';
@@ -10,15 +10,16 @@ interface ChatInputProps {
 
 const ChatInput: FC<ChatInputProps> = ({ onSend, disabled }) => {
     const [text, setText] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const handleSend = () => {
-        const trimmed = text.trim();
-        if (!trimmed) return;
-        onSend(trimmed);
-        setText('');
+        if (text.trim() && !disabled) {
+            onSend(text.trim());
+            setText('');
+        }
     };
 
-    const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -26,30 +27,27 @@ const ChatInput: FC<ChatInputProps> = ({ onSend, disabled }) => {
     };
 
     // Auto-resize textarea
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
     useEffect(() => {
-        const el = textareaRef.current;
-        if (el) {
-            el.style.height = 'auto';
-            el.style.height = `${el.scrollHeight}px`;
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
         }
     }, [text]);
 
     return (
-        <div className="flex items-end gap-2 p-2">
+        <div className="flex items-end gap-2">
             <textarea
                 ref={textareaRef}
-                placeholder="Type a message..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
+                placeholder="Type a message..."
                 rows={1}
-                className="flex-1 min-h-10 resize-none rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 min-h-10 max-h-30 resize-none rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 disabled={disabled}
             />
             <button
-                type="button"
-                aria-label="Send message"
                 onClick={handleSend}
                 className="flex h-10 w-10 items-center justify-center rounded bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 disabled={disabled}
