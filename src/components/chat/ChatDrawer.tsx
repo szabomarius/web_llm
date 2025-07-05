@@ -111,7 +111,7 @@ const ChatDrawer: FC<ChatDrawerProps> = ({
                         key={message.id}
                         role={message.role}
                         content={message.content}
-                        thinking={message.thinking}
+                        thinking={message.thinking ?? ''}
                     />
                 ))}
             </div>
