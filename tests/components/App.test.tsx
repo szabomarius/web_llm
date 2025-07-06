@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import App from '../../src/App';
 
 describe('App component', () => {
-    it('renders the Hello World heading', () => {
+    it('renders the WebLLM Chat heading', () => {
         render(<App />);
-        expect(screen.getByText(/Hello World/i)).toBeInTheDocument();
+        expect(screen.getByText(/WebLLM Chat/i)).toBeInTheDocument();
     });
 });

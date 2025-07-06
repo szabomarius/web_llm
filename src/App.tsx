@@ -1,27 +1,161 @@
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import ChatDrawer from './components/chat/ChatDrawer';
 import type { ChatMessage } from './components/chat/ChatMessage.type';
+import { WebLLM, type WebLLMMessage } from './services/WebLLM';
+
+type DownloadProgress = {
+    progress: number;
+    file: string;
+};
+
+type ModelStatus = 'initializing' | 'ready' | 'error';
 
 const App: FC = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        { id: 1, role: 'user', content: 'hi' },
-        {
-            id: 2,
-            role: 'assistant',
-            content: 'The chat bot answers normally, in this whole text.',
-        },
-        { id: 3, role: 'user', content: "now let's.." },
-    ]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [downloadProgress, setDownloadProgress] =
+        useState<DownloadProgress | null>(null);
+    const [modelStatus, setModelStatus] = useState<ModelStatus>('initializing');
+    const [isGenerating, setIsGenerating] = useState(false);
+    const llm = useRef<WebLLM | null>(null);
+
+    useEffect(() => {
+        const handleLLMMessage = (message: WebLLMMessage) => {
+            switch (message.type) {
+                case 'token':
+                    setMessages((prev) => {
+                        const lastMessage = prev[prev.length - 1];
+                        if (lastMessage?.role === 'assistant') {
+                            const newRawContent =
+                                (lastMessage._rawContent || '') +
+                                message.payload;
+
+                            let finalContent = '';
+                            let finalThinking = '';
+                            let buffer = newRawContent;
+
+                            const thinkTagStart = '<think>';
+                            const thinkTagEnd = '</think>';
+
+                            while (buffer.length > 0) {
+                                const thinkStartIdx =
+                                    buffer.indexOf(thinkTagStart);
+
+                                if (thinkStartIdx === -1) {
+                                    finalContent += buffer;
+                                    buffer = '';
+                                    continue;
+                                }
+
+                                finalContent += buffer.substring(
+                                    0,
+                                    thinkStartIdx
+                                );
+                                buffer = buffer.substring(thinkStartIdx);
+
+                                const thinkEndIdx = buffer.indexOf(thinkTagEnd);
+
+                                if (thinkEndIdx === -1) {
+                                    finalThinking += buffer.substring(
+                                        thinkTagStart.length
+                                    );
+                                    buffer = '';
+                                    continue;
+                                }
+
+                                finalThinking += buffer.substring(
+                                    thinkTagStart.length,
+                                    thinkEndIdx
+                                );
+                                buffer = buffer.substring(
+                                    thinkEndIdx + thinkTagEnd.length
+                                );
+                            }
+
+                            return [
+                                ...prev.slice(0, -1),
+                                {
+                                    ...lastMessage,
+                                    content: finalContent,
+                                    thinking: finalThinking,
+                                    _rawContent: newRawContent,
+                                },
+                            ];
+                        }
+                        return prev;
+                    });
+                    break;
+                case 'generation-complete':
+                    setIsGenerating(false);
+                    // Generation is done.
+                    break;
+                case 'download-progress': {
+                    const payload = message.payload as {
+                        progress: number;
+                        file: string;
+                    };
+                    if (
+                        payload &&
+                        typeof payload.progress === 'number' &&
+                        typeof payload.file === 'string'
+                    ) {
+                        setDownloadProgress({
+                            progress: payload.progress,
+                            file: payload.file,
+                        });
+                    }
+                    setModelStatus('initializing');
+                    break;
+                }
+                case 'ready':
+                    setDownloadProgress(null);
+                    setModelStatus('ready');
+                    break;
+                case 'error':
+                    setModelStatus('error');
+                    setIsGenerating(false);
+                    // Handle errors from the worker.
+                    setMessages((prev) => [
+                        ...prev,
+                        {
+                            id: Date.now(),
+                            role: 'assistant',
+                            content:
+                                'Sorry, an error occurred while processing your request. Please try again.',
+                        },
+                    ]);
+                    break;
+            }
+        };
+
+        const webllm = new WebLLM(handleLLMMessage);
+        llm.current = webllm;
+
+        return () => {
+            webllm.terminate();
+        };
+    }, []);
 
     const handleSend = (text: string) => {
-        setMessages((prev) => [
-            ...prev,
-            { id: Date.now(), role: 'user', content: text },
-            { id: Date.now() + 1, role: 'assistant', content: 'Echo: ' + text }, // stub
-        ]);
+        if (!llm.current) return;
+
+        const userMessage: ChatMessage = {
+            id: Date.now(),
+            role: 'user',
+            content: text,
+        };
+        const assistantMessage: ChatMessage = {
+            id: Date.now() + 1,
+            role: 'assistant',
+            content: '',
+            thinking: '',
+            _rawContent: '',
+        };
+        setMessages((prev) => [...prev, userMessage, assistantMessage]);
+        setIsGenerating(true);
+        llm.current.generate(text);
     };
 
     // Toggle chat with ⌘+E hotkey
@@ -38,7 +172,21 @@ const App: FC = () => {
 
     return (
         <div className="relative flex min-h-screen items-center justify-center bg-white">
-            <h1 className="text-4xl font-bold text-black">Hello World</h1>
+            <div className="text-center">
+                <h1 className="text-4xl font-bold text-black mb-4">
+                    WebLLM Chat
+                </h1>
+                <p className="text-gray-600 mb-2">
+                    An AI chat interface powered by WebLLM
+                </p>
+                <p className="text-sm text-gray-500">
+                    Press{' '}
+                    <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">
+                        ⌘+E
+                    </kbd>{' '}
+                    to open the chat
+                </p>
+            </div>
 
             {/* Chat components */}
             <ChatDrawer
@@ -46,6 +194,9 @@ const App: FC = () => {
                 toggle={() => setIsChatOpen((o) => !o)}
                 messages={messages}
                 onSend={handleSend}
+                downloadProgress={downloadProgress}
+                modelStatus={modelStatus}
+                isGenerating={isGenerating}
             />
         </div>
     );
