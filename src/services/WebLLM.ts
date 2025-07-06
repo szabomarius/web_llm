@@ -1,3 +1,9 @@
+// Type definitions for message interfaces
+export interface ModelMessage {
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+}
+
 export type WebLLMMessage = {
     type:
         | 'token'
@@ -27,6 +33,10 @@ export class WebLLM {
 
     public generate(prompt: string) {
         this.worker.postMessage({ prompt });
+    }
+
+    public generateWithHistory(messages: ModelMessage[]) {
+        this.worker.postMessage({ messages });
     }
 
     public terminate() {

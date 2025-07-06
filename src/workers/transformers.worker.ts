@@ -4,6 +4,19 @@ import {
     TextStreamer,
 } from '@huggingface/transformers';
 
+// Type definitions for message interfaces
+interface ModelMessage {
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+}
+
+interface WorkerMessageData {
+    // New format: conversation history
+    messages?: ModelMessage[];
+    // Old format: single prompt (for backward compatibility)
+    prompt?: string;
+}
+
 /**
  * A singleton class to manage the text generation pipeline.
  */
@@ -43,7 +56,7 @@ async function initialize() {
     }
 }
 
-self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
+self.onmessage = async (event: MessageEvent<WorkerMessageData>) => {
     const pipe = await PipelineSingleton.getInstance();
     if (!pipe) {
         self.postMessage({
@@ -53,16 +66,32 @@ self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
         return;
     }
 
-    const messages = [
-        {
-            role: 'system',
-            content: 'You are a friendly assistant.',
-        },
-        {
-            role: 'user',
-            content: event.data.prompt,
-        },
-    ];
+    let messages: ModelMessage[];
+
+    // Support both new format (messages array) and old format (single prompt)
+    if (event.data.messages) {
+        // New format: use provided conversation history
+        messages = event.data.messages;
+    } else if (event.data.prompt) {
+        // Old format: create messages array from prompt (backward compatibility)
+        messages = [
+            {
+                role: 'system',
+                content: 'You are a friendly assistant.',
+            },
+            {
+                role: 'user',
+                content: event.data.prompt,
+            },
+        ];
+    } else {
+        self.postMessage({
+            type: 'error',
+            payload:
+                'Invalid message format: must provide either messages array or prompt string.',
+        });
+        return;
+    }
 
     const streamer = new TextStreamer(pipe.tokenizer, {
         skip_prompt: true,
