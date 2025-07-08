@@ -4,6 +4,19 @@ import {
     TextStreamer,
 } from '@huggingface/transformers';
 
+// Type definitions for message interfaces
+interface ModelMessage {
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+}
+
+interface WorkerMessageData {
+    // New format: conversation history
+    messages?: ModelMessage[];
+    // Old format: single prompt (for backward compatibility)
+    prompt?: string;
+}
+
 /**
  * A singleton class to manage the text generation pipeline.
  */
@@ -14,7 +27,7 @@ class PipelineSingleton {
         if (this.instance === null) {
             this.instance = pipeline(
                 'text-generation',
-                'onnx-community/Qwen3-0.6B-ONNX',
+                'HuggingFaceTB/SmolLM2-1.7B-Instruct',
                 {
                     dtype: 'q4f16',
                     device: 'webgpu',
@@ -43,7 +56,7 @@ async function initialize() {
     }
 }
 
-self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
+self.onmessage = async (event: MessageEvent<WorkerMessageData>) => {
     const pipe = await PipelineSingleton.getInstance();
     if (!pipe) {
         self.postMessage({
@@ -53,16 +66,39 @@ self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
         return;
     }
 
-    const messages = [
-        {
-            role: 'system',
-            content: 'You are a friendly assistant.',
-        },
-        {
-            role: 'user',
-            content: event.data.prompt,
-        },
-    ];
+    let messages: ModelMessage[];
+
+    // Support both new format (messages array) and old format (single prompt)
+    if (event.data.messages) {
+        // New format: use provided conversation history (includes system message)
+        messages = event.data.messages;
+    } else if (event.data.prompt) {
+        // Old format: create messages array from prompt (backward compatibility)
+        messages = [
+            {
+                role: 'system',
+                content:
+                    'You are a friendly but sharp assistant. You follow instructions precisely and are not overly verbose. Always use proper **markdown formatting** including:\n\n- **Bold text** for emphasis\n- `inline code` for technical terms\n- ```code blocks``` for code examples\n- Bullet points for lists\n- Line breaks between paragraphs\n- Clear structure and readability\n\nFormat your responses using markdown syntax for the best user experience.',
+            },
+            {
+                role: 'user',
+                content: event.data.prompt,
+            },
+        ];
+    } else {
+        self.postMessage({
+            type: 'error',
+            payload:
+                'Invalid message format: must provide either messages array or prompt string.',
+        });
+        return;
+    }
+
+    // Log the messages being sent to the model for debugging
+    console.log(
+        '🤖 Messages being sent to model:',
+        JSON.stringify(messages, null, 2)
+    );
 
     const streamer = new TextStreamer(pipe.tokenizer, {
         skip_prompt: true,
@@ -76,8 +112,10 @@ self.onmessage = async (event: MessageEvent<{ prompt: string }>) => {
     });
 
     await pipe(messages, {
-        max_new_tokens: 512,
+        max_new_tokens: 10000,
         streamer,
+        temperature: 0.7,
+        top_p: 0.95,
     });
 
     self.postMessage({ type: 'generation-complete' });

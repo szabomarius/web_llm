@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import ChatDrawer from './components/chat/ChatDrawer';
 import type { ChatMessage } from './components/chat/ChatMessage.type';
 import { WebLLM, type WebLLMMessage } from './services/WebLLM';
+import { prepareConversationHistory } from './utils/messageUtils';
 
 type DownloadProgress = {
     progress: number;
@@ -114,6 +115,7 @@ const App: FC = () => {
                     setModelStatus('ready');
                     break;
                 case 'error':
+                    console.error(message);
                     setModelStatus('error');
                     setIsGenerating(false);
                     // Handle errors from the worker.
@@ -153,9 +155,21 @@ const App: FC = () => {
             thinking: '',
             _rawContent: '',
         };
+
+        // Prepare conversation history including the new user message
+        const conversationHistory = prepareConversationHistory([
+            ...messages,
+            userMessage,
+        ]);
+
+        // Log the conversation history being sent for debugging
+        console.log('📤 Conversation history being sent:', conversationHistory);
+
         setMessages((prev) => [...prev, userMessage, assistantMessage]);
         setIsGenerating(true);
-        llm.current.generate(text);
+
+        // Use the new generateWithHistory method instead of generate
+        llm.current.generateWithHistory(conversationHistory);
     };
 
     // Toggle chat with ⌘+E hotkey
