@@ -115,6 +115,7 @@ const App: FC = () => {
                     setModelStatus('ready');
                     break;
                 case 'error':
+                    console.error(message);
                     setModelStatus('error');
                     setIsGenerating(false);
                     // Handle errors from the worker.
@@ -160,6 +161,9 @@ const App: FC = () => {
             ...messages,
             userMessage,
         ]);
+
+        // Log the conversation history being sent for debugging
+        console.log('📤 Conversation history being sent:', conversationHistory);
 
         setMessages((prev) => [...prev, userMessage, assistantMessage]);
         setIsGenerating(true);

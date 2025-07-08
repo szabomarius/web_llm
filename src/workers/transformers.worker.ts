@@ -27,7 +27,7 @@ class PipelineSingleton {
         if (this.instance === null) {
             this.instance = pipeline(
                 'text-generation',
-                'onnx-community/Qwen3-0.6B-ONNX',
+                'HuggingFaceTB/SmolLM2-1.7B-Instruct',
                 {
                     dtype: 'q4f16',
                     device: 'webgpu',
@@ -70,14 +70,15 @@ self.onmessage = async (event: MessageEvent<WorkerMessageData>) => {
 
     // Support both new format (messages array) and old format (single prompt)
     if (event.data.messages) {
-        // New format: use provided conversation history
+        // New format: use provided conversation history (includes system message)
         messages = event.data.messages;
     } else if (event.data.prompt) {
         // Old format: create messages array from prompt (backward compatibility)
         messages = [
             {
                 role: 'system',
-                content: 'You are a friendly assistant.',
+                content:
+                    'You are a friendly but sharp assistant. You follow instructions precisely and are not overly verbose. Always use proper **markdown formatting** including:\n\n- **Bold text** for emphasis\n- `inline code` for technical terms\n- ```code blocks``` for code examples\n- Bullet points for lists\n- Line breaks between paragraphs\n- Clear structure and readability\n\nFormat your responses using markdown syntax for the best user experience.',
             },
             {
                 role: 'user',
@@ -93,6 +94,12 @@ self.onmessage = async (event: MessageEvent<WorkerMessageData>) => {
         return;
     }
 
+    // Log the messages being sent to the model for debugging
+    console.log(
+        '🤖 Messages being sent to model:',
+        JSON.stringify(messages, null, 2)
+    );
+
     const streamer = new TextStreamer(pipe.tokenizer, {
         skip_prompt: true,
         skip_special_tokens: true,
@@ -105,8 +112,10 @@ self.onmessage = async (event: MessageEvent<WorkerMessageData>) => {
     });
 
     await pipe(messages, {
-        max_new_tokens: 512,
+        max_new_tokens: 10000,
         streamer,
+        temperature: 0.7,
+        top_p: 0.95,
     });
 
     self.postMessage({ type: 'generation-complete' });
