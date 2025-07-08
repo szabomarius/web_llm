@@ -188,10 +188,10 @@ const App: FC = () => {
         <div className="relative flex min-h-screen items-center justify-center bg-white">
             <div className="text-center">
                 <h1 className="text-4xl font-bold text-black mb-4">
-                    WebLLM Chat
+                    Transformers.js Chat
                 </h1>
                 <p className="text-gray-600 mb-2">
-                    An AI chat interface powered by WebLLM
+                    An AI chat interface powered by Transformers.js
                 </p>
                 <p className="text-sm text-gray-500">
                     Press{' '}
